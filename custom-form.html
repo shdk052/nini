@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>שליחת טופס — Apps Script</title>
+<style>
+/* CSS נשאר זהה ומתוקן */
+body{font-family: Arial, sans-serif;background:#f4f7fb;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;padding:20px}
+.card{width:360px;background:#fff;padding:22px;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,0.08)}
+h2{margin:0 0 12px 0;font-size:18px}
+label{display:block;margin-top:10px;font-size:14px}
+input[type="text"], input[type="email"], textarea{
+  width:100%;padding:10px;margin-top:6px;border:1px solid #d6dbe6;border-radius:8px;font-size:15px;box-sizing:border-box
+}
+textarea{min-height:100px;resize:vertical}
+.row{display:flex;gap:8px;margin-top:12px}
+button{flex:1;padding:10px;border-radius:8px;border:0;background:#1a73e8;color:#fff;font-weight:600;cursor:pointer}
+.msg{margin-top:12px;padding:10px;border-radius:8px;display:none}
+.msg.success{background:#e6f4ea;color:#0b6b2f}
+.msg.error{background:#fdecea;color:#8a1f1f}
+small{color:#666;display:block;margin-top:8px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <h2>שלח תשובה — טופס ניסיון Apps Script</h2>
+
+        <form id="myForm" 
+            action="https://script.google.com/macros/s/AKfycbyo__kZ3Xg6c69DLIfeEV1RzMC0OKI5K8fKty-TSoK8NesKiIwEChexB666e574JVP1/exec" 
+            method="POST" 
+            target="hidden_iframe" 
+            autocomplete="off">
+      
+                    <label for="option">אפשרות (entry.810804628)</label>
+      <input id="option" name="entry.810804628" type="text" placeholder="הכנס טקסט..." required>
+        
+            <label for="mail">אימייל (emailAddress)</label>
+      <input id="mail" name="emailAddress" type="email" placeholder="example@mail.com">
+
+      <div class="row">
+        <button type="submit" id="submitBtn">שלח</button>
+      </div>
+
+      <small>הנתונים נשלחים עכשיו דרך Google Apps Script.</small>
+    </form>
+
+    <div id="successMsg" class="msg success">נשלח בהצלחה ✅ — בדוק את התשובות בגליון האלקטרוני!</div>
+    <div id="errorMsg" class="msg error">אירעה שגיאה בשליחה ❌. נסה שוב.</div>
+  </div>
+
+    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
+
+<script>
+  const form = document.getElementById('myForm');
+  const success = document.getElementById('successMsg');
+  const error = document.getElementById('errorMsg');
+  const iframe = document.getElementById('hidden_iframe');
+  const btn = document.getElementById('submitBtn');
+
+    function resetButton() {
+        btn.disabled = false;
+        btn.textContent = 'שלח';
+    }
+
+  iframe.addEventListener('load', function() {
+    if (form._justSubmitted) {
+        form._justSubmitted = false;
+        success.style.display = 'block';
+        error.style.display = 'none';
+        form.reset();
+        resetButton();
+    }
+  });
+
+  form.addEventListener('submit', function(e){
+    success.style.display = 'none';
+    error.style.display = 'none';
+    
+    form._justSubmitted = true;
+    
+    btn.disabled = true;
+    btn.textContent = 'שולח...';
+
+    setTimeout(() => {
+        if (form._justSubmitted) {
+            form._justSubmitted = false;
+            error.style.display = 'block';
+            resetButton();
+        }
+    }, 6000);
+  });
+</script>
+</body>
+</html>
