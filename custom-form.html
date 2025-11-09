@@ -1,95 +1,109 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>שליחת טופס — Apps Script</title>
-<style>
-/* CSS נשאר זהה ומתוקן */
-body{font-family: Arial, sans-serif;background:#f4f7fb;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;padding:20px}
-.card{width:360px;background:#fff;padding:22px;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,0.08)}
-h2{margin:0 0 12px 0;font-size:18px}
-label{display:block;margin-top:10px;font-size:14px}
-input[type="text"], input[type="email"], textarea{
-  width:100%;padding:10px;margin-top:6px;border:1px solid #d6dbe6;border-radius:8px;font-size:15px;box-sizing:border-box
-}
-textarea{min-height:100px;resize:vertical}
-.row{display:flex;gap:8px;margin-top:12px}
-button{flex:1;padding:10px;border-radius:8px;border:0;background:#1a73e8;color:#fff;font-weight:600;cursor:pointer}
-.msg{margin-top:12px;padding:10px;border-radius:8px;display:none}
-.msg.success{background:#e6f4ea;color:#0b6b2f}
-.msg.error{background:#fdecea;color:#8a1f1f}
-small{color:#666;display:block;margin-top:8px}
-</style>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>שליחת טופס - ניסיון Firebase</title>
+    
+    <!-- ייבוא ה-SDK של Firebase בפורמט מודרני (module) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        
+        // --- 1. הגדרות Firebase שלך (שהועתקו מהקונסולה) ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCFm5QVWIWwIjOFxeGaXgwKKO-1hv_AEoM",
+            authDomain: "nini-fc910.firebaseapp.com",
+            projectId: "nini-fc910",
+            storageBucket: "nini-fc910.firebasestorage.app",
+            messagingSenderId: "500423351979",
+            appId: "1:500423351979:web:c135ac115e8ba21d5ce1ee",
+            measurementId: "G-QHY0BLGPQH"
+        };
+
+        // --- 2. אתחול Firebase ו-Firestore ---
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const form = document.getElementById('firebaseForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const messageDiv = document.getElementById('message');
+
+        function showMessage(type, text) {
+            messageDiv.className = `msg ${type}`;
+            messageDiv.textContent = text;
+            messageDiv.style.display = 'block';
+        }
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault(); 
+            
+            messageDiv.style.display = 'none';
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'שולח...';
+
+            // 3. איסוף הנתונים מהטופס
+            const formData = {
+                timestamp: serverTimestamp(), // חותמת זמן של Firebase
+                option_text: document.getElementById('option').value,
+                email: document.getElementById('mail').value,
+                // כאן תוכל להוסיף שדות נוספים מהטופס שלך
+            };
+
+            try {
+                // 4. שליחה ל-Firestore (לקולקציה בשם 'premie_submissions')
+                await addDoc(collection(db, "premie_submissions"), formData);
+
+                showMessage('success', '✅ נשלח בהצלחה ל-Firebase!');
+                form.reset(); 
+
+            } catch (error) {
+                console.error("שגיאת שליחה ל-Firebase:", error);
+                // שגיאה נפוצה תהיה בגלל חוקי האבטחה (Security Rules)
+                showMessage('error', `❌ שגיאה בשליחה! ודא שחוקי Firestore מאפשרים כתיבה. שגיאה: ${error.code}`);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'שלח ל-Firebase';
+            }
+        });
+    </script>
+
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f7fb; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; padding: 20px; }
+        .card { width: 360px; background: #fff; padding: 22px; border-radius: 12px; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08); direction: rtl; }
+        h2 { margin: 0 0 12px 0; font-size: 18px; text-align: right; }
+        label { display: block; margin-top: 10px; font-size: 14px; text-align: right; }
+        input[type="text"], input[type="email"] { width: 100%; padding: 10px; margin-top: 6px; border: 1px solid #d6dbe6; border-radius: 8px; font-size: 15px; box-sizing: border-box; text-align: right; }
+        .row { display: flex; gap: 8px; margin-top: 12px; }
+        button { flex: 1; padding: 10px; border-radius: 8px; border: 0; background: #1a73e8; color: #fff; font-weight: 600; cursor: pointer; transition: background 0.3s; }
+        button:disabled { background: #90a8c2; cursor: not-allowed; }
+        .msg { margin-top: 12px; padding: 10px; border-radius: 8px; display: none; font-weight: bold; text-align: center; }
+        .msg.success { background: #e6f4ea; color: #0b6b2f; }
+        .msg.error { background: #fdecea; color: #8a1f1f; }
+        small { color: #666; display: block; margin-top: 8px; text-align: right; }
+    </style>
 </head>
 <body>
-  <div class="card">
-    <h2>שלח תשובה — טופס ניסיון Apps Script</h2>
+    <div class="card">
+        <h2>שלח תשובה — ניסיון Firebase</h2>
 
-        <form id="myForm" 
-            action="https://script.google.com/macros/s/AKfycbyo__kZ3Xg6c69DLIfeEV1RzMC0OKI5K8fKty-TSoK8NesKiIwEChexB666e574JVP1/exec" 
-            method="POST" 
-            target="hidden_iframe" 
-            autocomplete="off">
-      
-                    <label for="option">אפשרות (entry.810804628)</label>
-      <input id="option" name="entry.810804628" type="text" placeholder="הכנס טקסט..." required>
-        
-            <label for="mail">אימייל (emailAddress)</label>
-      <input id="mail" name="emailAddress" type="email" placeholder="example@mail.com">
+        <div id="message" class="msg" style="display:none;"></div>
 
-      <div class="row">
-        <button type="submit" id="submitBtn">שלח</button>
-      </div>
+        <form id="firebaseForm">
+            <!-- *** שדה ראשי (שדה ניסיון): *** -->
+            <label for="option">טקסט ניסיון (סיפור)</label>
+            <input id="option" name="option_text" type="text" placeholder="הכנס טקסט..." required>
 
-      <small>הנתונים נשלחים עכשיו דרך Google Apps Script.</small>
-    </form>
+            <!-- *** שדה אימייל: *** -->
+            <label for="mail">אימייל (Email)</label>
+            <input id="mail" name="email_address" type="email" placeholder="example@mail.com" required>
 
-    <div id="successMsg" class="msg success">נשלח בהצלחה ✅ — בדוק את התשובות בגליון האלקטרוני!</div>
-    <div id="errorMsg" class="msg error">אירעה שגיאה בשליחה ❌. נסה שוב.</div>
-  </div>
+            <div class="row">
+                <button type="submit" id="submitBtn">שלח ל-Firebase</button>
+            </div>
 
-    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
-
-<script>
-  const form = document.getElementById('myForm');
-  const success = document.getElementById('successMsg');
-  const error = document.getElementById('errorMsg');
-  const iframe = document.getElementById('hidden_iframe');
-  const btn = document.getElementById('submitBtn');
-
-    function resetButton() {
-        btn.disabled = false;
-        btn.textContent = 'שלח';
-    }
-
-  iframe.addEventListener('load', function() {
-    if (form._justSubmitted) {
-        form._justSubmitted = false;
-        success.style.display = 'block';
-        error.style.display = 'none';
-        form.reset();
-        resetButton();
-    }
-  });
-
-  form.addEventListener('submit', function(e){
-    success.style.display = 'none';
-    error.style.display = 'none';
-    
-    form._justSubmitted = true;
-    
-    btn.disabled = true;
-    btn.textContent = 'שולח...';
-
-    setTimeout(() => {
-        if (form._justSubmitted) {
-            form._justSubmitted = false;
-            error.style.display = 'block';
-            resetButton();
-        }
-    }, 6000);
-  });
-</script>
+            <small>הנתונים יישמרו בקולקציה "premie_submissions" במסד הנתונים Firestore.</small>
+        </form>
+    </div>
 </body>
 </html>
